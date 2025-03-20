@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Курси валют</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <script>
+        function sortTable(param) {
+            let currentUrl = new URL(window.location.href);
+            let currentSort = currentUrl.searchParams.get("sort");
+
+            let newSort = currentSort === "asc" ? "desc" : "asc";
+
+            currentUrl.searchParams.set("sort", newSort);
+            window.location.href = currentUrl.toString();
+        }
+    </script>
+</head>
+<body>
+<h2>Курси валют</h2>
+
+<a href="/export"><button>Завантажити Excel</button></a>
+<a href="/exchange"><button>Переглянути архів</button></a>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Код</th>
+        <th>Назва</th>
+        <th onclick="sortTable('purchase')">Купівля ⬆⬇</th>
+        <th onclick="sortTable('sale')">Продаж ⬆⬇</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="rate : ${rates}">
+        <td th:text="${rate.Currency}"></td>
+        <td th:text="${rate.BankName}"></td>
+        <td th:text="${rate.Purchase}"></td>
+        <td th:text="${rate.Sale}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

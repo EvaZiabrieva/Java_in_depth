@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Курси валют</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <script>
+        let sortDirections = [true, true, true, true];
+
+        function sortTable(n) {
+            let table, rows, switching, i, x, y, shouldSwitch, direction, switchCount = 0;
+            table = document.getElementById("exchangeTable");
+            switching = true;
+            direction = sortDirections[n] ? "asc" : "desc";
+
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < rows.length - 1; i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                    let xVal = parseFloat(x.innerHTML) || 0;
+                    let yVal = parseFloat(y.innerHTML) || 0;
+
+                    if ((direction === "asc" && xVal > yVal) || (direction === "desc" && xVal < yVal)) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchCount++;
+                } else {
+                    if (switchCount === 0 && direction === "asc") {
+                        direction = "desc";
+                        switching = true;
+                    }
+                }
+            }
+
+            sortDirections[n] = !sortDirections[n];
+            updateArrows(n, sortDirections[n]);
+        }
+
+        function updateArrows(n, isAscending) {
+            let headers = document.querySelectorAll("th");
+            headers.forEach((header, index) => {
+                if (index > 0) {
+                    header.innerHTML = header.innerHTML.replace(/⬆|⬇/g, "");
+                }
+            });
+
+            headers[n].innerHTML += isAscending ? " ⬆" : " ⬇";
+        }
+
+        function updateExchangeRates() {
+            let selectedDate = document.getElementById("datePicker").value;
+            let formattedDate = selectedDate.split("-").reverse().join(".");
+            window.location.href = '/exchange?date=' + formattedDate;
+        }
+    </script>
+</head>
+<body>
+<h2>Курси валют на <span th:text="${date}"></span></h2>
+
+<div class="controls">
+    <label for="datePicker">Оберіть дату:</label>
+    <input type="date" id="datePicker" onchange="updateExchangeRates()">
+</div>
+
+<a href="/"><button>Повернутись на головну</button></a>
+
+<table border="1" id="exchangeTable">
+    <tr>
+        <th>Валюта</th>
+        <th onclick="sortTable(1)">Продаж (НБУ) ⬆</th>
+        <th onclick="sortTable(2)">Купівля (НБУ) ⬆</th>
+        <th onclick="sortTable(3)">Продаж ⬆</th>
+        <th onclick="sortTable(4)">Купівля ⬆</th>
+    </tr>
+    <tr th:each="rate : ${exchangeRates}">
+        <td th:text="${rate.currency}"></td>
+        <td th:text="${rate.saleRateNB}"></td>
+        <td th:text="${rate.purchaseRateNB}"></td>
+        <td th:text="${rate.saleRate}"></td>
+        <td th:text="${rate.purchaseRate}"></td>
+    </tr>
+</table>
+
+</body>
+</html>
